@@ -1,3 +1,4 @@
+use crate::NoiseConfig;
 use crate::noise_element::NoiseElement;
 use crate::utils::*;
 use std::sync::Arc;
@@ -43,8 +44,10 @@ impl AudioProcessor {
         self.sample_clock = incremented_sample_clock % self.sample_rate;
     }
 
-    pub fn colored_noise(&mut self, fade_in: f32, sustain: f32, fade_out: f32) -> f32 {
+    pub fn default_noise(&mut self, noise_config: NoiseConfig) -> f32 {
         self.increment_sample_clock();
+
+        let NoiseConfig { fade_in, hold, fade_out, .. } = noise_config;
 
         let sample_clock = self.sample_clock as f32;
         let sample_rate = self.sample_rate as f32;
@@ -53,10 +56,10 @@ impl AudioProcessor {
         let mut amp = 0.0;
         if seconds_gone_by < fade_in {
             amp = get_amp_for_fade_in(fade_in, sample_rate, seconds_gone_by, sample_clock);
-        } else if seconds_gone_by < fade_in + sustain {
+        } else if seconds_gone_by < fade_in + hold {
             amp = 1.0;
-        } else if seconds_gone_by < fade_in + sustain + fade_out {
-            let relative_seconds_gone_by = seconds_gone_by - fade_in - sustain;
+        } else if seconds_gone_by < fade_in + hold + fade_out {
+            let relative_seconds_gone_by = seconds_gone_by - fade_in - hold;
             amp = get_amp_for_fade_out(fade_out, sample_rate, relative_seconds_gone_by, sample_clock);
         } else {
             amp = 0.0

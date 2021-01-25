@@ -1,13 +1,91 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>wasm noise</title>
-  </head>
-  <body>
-    <div>
-      <input id="play-default-noise" type="button" value="play-default-noise"/>
-      <input id="stop-default-noise" type="button" value="stop-default-noise"/>
-    </div>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <title>wasm noise</title>
+</head>
+
+<body>
+  <div>
+    <h3>Fade In</h3>
+    <label>minutes</label>
+    <input id="fade-in-minutes" type="number" value="0" min="0" />
+    <button id="fade-in-minutes+" onclick="incrementMinutes('fade-in', 1)">+</button>
+    <button id="fade-in-minutes-" onclick="incrementMinutes('fade-in', -1)">-</button>
+    <label>seconds</label>
+    <input id="fade-in-seconds" type="number" value="2" max="59" />
+    <button id="fade-in-seconds+" onclick="incrementSeconds('fade-in', 1)">+</button>
+    <button id="fade-in-seconds-" onclick="incrementSeconds('fade-in', -1)">-</button>
+  </div>
+  <div>
+    <h3>Hold Time</h3>
+    <label>minutes</label>
+    <input id="hold-minutes" type="number" value="0" min="0" />
+    <button onclick="incrementMinutes('hold', 1)">+</button>
+    <button onclick="incrementMinutes('hold', -1)">-</button>
+    <label>seconds</label>
+    <input id="hold-seconds" type="number" value="2" max="59" />
+    <button onclick="incrementSeconds('hold', 1)">+</button>
+    <button onclick="incrementSeconds('hold', -1)">-</button>
+  </div>
+  <div>
+    <h3>Fade Out</h3>
+    <label>minutes</label>
+    <input id="fade-out-minutes" type="number" value="0" min="0" />
+    <button onclick="incrementMinutes('fade-out', 1)">+</button>
+    <button onclick="incrementMinutes('fade-out', -1)">-</button>
+    <label>seconds</label>
+    <input id="fade-out-seconds" type="number" value="2" max="59" />
+    <button onclick="incrementSeconds('fade-out', 1)">+</button>
+    <button onclick="incrementSeconds('fade-out', -1)">-</button>
+  </div>
+  <br />
+  <br />
+  <br />
+  <br />
+  <div>
+    <input id="play-default-noise" type="button" value="play-default-noise" />
+    <input id="stop-default-noise" type="button" value="stop-default-noise" />
+  </div>
+</body>
+
+<script>
+  function incrementMinutes(group, amount) {
+    const minute_input = document.getElementById(group + '-minutes');
+
+    var minute_value = parseInt(minute_input.value, 10);
+    minute_value = isNaN(minute_value) ? 0 : minute_value;
+
+    // One whole day should be enough :-P
+    if (minute_value + amount >= 1440) {
+      minute_input.value = 1440
+    } else if (minute_value + amount < 0) {
+      minute_input.value = 0
+    } else {
+      minute_input.value = minute_value + amount;
+    }
+  }
+
+  function incrementSeconds(group, amount) {
+    const second_input = document.getElementById(group + '-seconds');
+    const minute_input = document.getElementById(group + '-minutes');
+
+    var minute_value = parseInt(minute_input.value, 10);
+    var second_value = parseInt(second_input.value, 10);
+
+    second_value = isNaN(second_value) ? 0 : second_value;
+
+    if (second_value + amount >= 60) {
+      second_input.value = 0;
+      minute_input.value = minute_value + 1
+    } else if (second_value + amount < 0) {
+      second_input.value = 59;
+      minute_input.value = Math.max(0, minute_value - 1)
+    } else {
+      second_input.value = second_value + amount
+    }
+  }
+</script>
+
 </html>
