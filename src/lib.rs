@@ -13,19 +13,11 @@ use wasm_bindgen::prelude::*;
 use web_sys::console;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
-macro_rules! log {
-    ( $( $t:tt )* ) => {
-        web_sys::console::log_1(&format!( $( $t )* ).into());
-    }
-}
-
-// When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
-// allocator.
-//
-// If you don't want to use `wee_alloc`, you can safely delete this.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+// macro_rules! log {
+//     ( $( $t:tt )* ) => {
+//         web_sys::console::log_1(&format!( $( $t )* ).into());
+//     }
+// }
 
 // This is like the `main` function, except for JavaScript.
 #[wasm_bindgen(start)]
@@ -47,13 +39,11 @@ pub struct Handle(Stream);
 #[derive(Debug, Copy, Clone)]
 enum NoiseType {
     Default,
-    Pink,
 }
 
 fn convert_string_to_noise_type(noise_type: String) -> NoiseType {
     match noise_type.as_str() {
         "default" => NoiseType::Default,
-        "pink" => NoiseType::Pink,
         _ => panic!("Unkown NoiseType {}", noise_type),
     }
 }
@@ -71,7 +61,7 @@ fn get_config() -> (cpal::Device, cpal::SupportedStreamConfig) {
 pub fn play_noise(noise_type: String) -> Handle {
     let noise_type = convert_string_to_noise_type(noise_type);
 
-    log!("playing noise type: {:?}", noise_type);
+    // log!("playing noise type: {:?}", noise_type);
 
     let (device, config) = get_config();
 
@@ -113,7 +103,6 @@ where
         for frame in output.chunks_mut(channels) {
             let value: T = match noise_type {
                 NoiseType::Default => cpal::Sample::from::<f32>(&audio_processor.colored_noise(1.0, 5.0, 10.0)),
-                NoiseType::Pink => cpal::Sample::from::<f32>(&audio_processor.pink_noise()),
             };
             for sample in frame.iter_mut() {
                 *sample = value;

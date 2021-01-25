@@ -2,15 +2,15 @@ use crate::noise_element::NoiseElement;
 use crate::utils::*;
 use std::sync::Arc;
 use std::sync::Mutex;
-use web_sys::console::log;
+// use web_sys::console::log;
 extern crate web_sys;
 
 // A macro to provide `println!(..)`-style syntax for `console.log` logging.
-macro_rules! log {
-    ( $( $t:tt )* ) => {
-        web_sys::console::log_1(&format!( $( $t )* ).into());
-    }
-}
+// macro_rules! log {
+//     ( $( $t:tt )* ) => {
+//         web_sys::console::log_1(&format!( $( $t )* ).into());
+//     }
+// }
 
 pub struct AudioProcessor {
     sample_clock: usize,
@@ -18,11 +18,6 @@ pub struct AudioProcessor {
     noise_element_1: NoiseElement,
     noise_element_2: NoiseElement,
     noise_element_3: NoiseElement,
-    pink_noise_freq_1: f32,
-    pink_noise_freq_2: f32,
-    pink_noise_freq_3: f32,
-    pink_noise_freq_4: f32,
-    pink_noise_freq_5: f32,
     seconds_gone_by: usize,
 }
 
@@ -34,11 +29,6 @@ impl AudioProcessor {
             noise_element_1: NoiseElement::new(5, -1.0, 1.0, sample_rate),
             noise_element_2: NoiseElement::new(4, -0.3, 0.5, sample_rate),
             noise_element_3: NoiseElement::new(3, -0.5, 0.3, sample_rate),
-            pink_noise_freq_1: 0.0,
-            pink_noise_freq_2: 0.0,
-            pink_noise_freq_3: 0.0,
-            pink_noise_freq_4: 0.0,
-            pink_noise_freq_5: 0.0,
             seconds_gone_by: 0,
         }
     }
@@ -51,55 +41,6 @@ impl AudioProcessor {
         }
 
         self.sample_clock = incremented_sample_clock % self.sample_rate;
-    }
-
-    fn sine(&mut self, freq: f32) -> f32 {
-        ((self.sample_clock as f32) * freq * 2.0 * std::f32::consts::PI / (self.sample_rate as f32))
-            .sin()
-    }
-
-    // we will sines of lower frequencies and hope this words
-    pub fn pink_noise(&mut self) -> f32 {
-        self.increment_sample_clock();
-        let sample_rate_f32 = self.sample_rate as f32;
-
-
-        let mut final_f32 = 0.0;
-
-        let freq_count = 10;
-        let freq_count_f32 = freq_count as f32;
-
-        for i in 1..=freq_count {
-            let i_f32 = i as f32;
-            let freq = i_f32 / freq_count_f32 * sample_rate_f32 / freq_count_f32;
-            // low have higher amp
-            let amp = 1.0 - ((i_f32 - 1.0) / i_f32);
-            let sine = self.sine(freq) * amp;
-            final_f32 = final_f32 + sine;
-        }
-
-        final_f32
-        // change low least
-        // if self.sample_clock % 880 == 0 {
-        //     self.pink_noise_freq_1 =  440.0 + (random_f32() * 440.0);
-        // }
-        // if self.sample_clock % 2000 == 0 {
-        //     self.pink_noise_freq_2 =  400.0 + random_f32() * 400.0;
-        // }
-        // if self.sample_clock % 80 == 0 {
-        //     self.pink_noise_freq_2 = random_f32() * 800.0;
-        // }
-        // if self.sample_clock % 60 == 0 {
-        //     self.pink_noise_freq_3 = random_f32() * 1600.0;
-        // }
-
-        // let sine_1 = self.sine(self.pink_noise_freq_1) * 0.1;
-        // let sine_2 = self.sine(self.pink_noise_freq_2) * 0.1;
-        // let sine_3 = self.sine(self.pink_noise_freq_3);
-
-        // (sine_1 + sine_2 + sine_3) / 3.0
-        // (sine_1 + sine_2) / 2.0;
-        // sine_1
     }
 
     pub fn colored_noise(&mut self, fade_in: f32, sustain: f32, fade_out: f32) -> f32 {
